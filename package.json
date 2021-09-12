@@ -1,0 +1,25 @@
+{
+  "name": "blog-nodejs",
+  "version": "1.0.0",
+  "description": "Blog backend",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leorodriguessilva/blog-nodejs.git"
+  },
+  "author": "Leonardo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leorodriguessilva/blog-nodejs/issues"
+  },
+  "homepage": "https://github.com/leorodriguessilva/blog-nodejs#readme",
+  "dependencies": {
+    "@hapi/basic": "^6.0.0",
+    "@hapi/hapi": "^20.1.5",
+    "bcrypt": "^5.0.1",
+    "sqlite3": "^5.0.2"
+  }
+}
