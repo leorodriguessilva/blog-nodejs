@@ -1,6 +1,7 @@
 'use strict';
 
 const Bcrypt = require('bcrypt');
+const { func } = require('joi');
 const { db } = require('./db.js');
 
 const SALT_ROUNDS = 10;
@@ -11,13 +12,11 @@ const createUserRoutes = () => {
             method: 'POST',
             path: '/signin',
             handler: async (request, h) => {
-                try {
-                    const auth = await validateUserCredentials(request)
+                return await validateUserCredentials(request).then((auth) => {
                     return h.response(auth).code(200);
-                } catch(ex) {
-                    console.log(ex);
-                    return h.response().code(500);
-                }
+                }).catch((err) => {
+                    return h.response(err).code(500);
+                });
             }
         }, {
             method: 'POST',
@@ -50,24 +49,30 @@ const validateUserProps = (user) => {
 const validateUserCredentials = async (request) => {
     const user = request.payload;
     validateUserProps(user);
-    console.log(request.payload);
-    var userFound = {};
-    db.get(
-        "SELECT id, username, password, created_at FROM users WHERE username = (?)", 
-        user.username, 
-        async (err, row) => {
-            if(err) console.log(err);
-            else {
-                console.log(row);
-                Bcrypt.compare(user.password, row.password, (err, same) => {
-                    if(same) userFound = row;
-                });
+    return new Promise((resolve, reject) => { 
+        db.get(
+            "SELECT id, username, password, created_at FROM users WHERE username = (?)", 
+            user.username,
+            (err, row) => {
+                if(err) { 
+                    reject(err);
+                }
+                if(Bcrypt.compareSync(user.password, row.password)) {
+                    const isValid = row ? true : false;
+                    resolve(
+                        {
+                            isValid,
+                            userFound: {
+                                id: row.id,
+                                username: row.username,
+                                created_at: row.created_at
+                            }
+                        }
+                    );
+                }
             }
-        }
-    );
-    console.log(userFound);
-    const isValid = userFound === true;
-    return { isValid, userFound };
+        )
+    });
 }
 
 module.exports = { createUserRoutes, validateUserCredentials };
